@@ -1,5 +1,5 @@
 # game-in-rust
-Game in Rust for Fun!!!!!!!!!!!!!
+# Game in Rust for Fun!!!!!!!!!!!!!
 
 
 simple steps for setting up the game:
