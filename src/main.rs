@@ -4,50 +4,16 @@ use macroquad::prelude::*;
 mod collision;
 mod background;
 use background::draw_grid;
-use collision::{collision_left, collision_right};
+use collision::{collision_left, collision_right, collision_bottom, collision_top};
 
 
 use macroquad::audio::{load_sound, play_sound_once, Sound};
 
-const w: i32 = 1920;
+const w: i32 = 3000;
 const H: i32 = 1080;
 
 
-fn collision_top(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: f32) -> bool {
-    let player_top_edge = player_position.y;
-    let object_bottom_edge = object_position.y + size.y;
 
-    let player_left = player_position.x;
-    let player_right = player_position.x + player_size;
-    let object_left = object_position.x;
-    let object_right = object_position.x + size.x;
-
-    if player_top_edge < object_bottom_edge && player_top_edge > object_position.y &&
-        player_right > object_left && player_left < object_right {
-        // Collision detected, player is colliding with the bottom side of the object
-        true
-    } else {
-        // No collision
-        false
-    }
-}
-
-fn collision_bottom(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: Vec2) -> bool {
-    let player_pos_y = player_position.y + player_size.y;
-    let palayer_pos_x = player_position.x;
-    let object_pos_y = object_position.y;
-    let object_size_x = size.x;
-    let object_pos_x = object_position.x;
-
-
-    if player_pos_y >= object_pos_y && !{palayer_pos_x < object_pos_x} && !{palayer_pos_x > object_pos_x + object_size_x}{
-        // Collision detected, player is colliding with the top side of the object
-        true
-    } else {
-        // No collision
-        false
-    }
-}
  
 
 fn handle_jump(jump_state: &mut bool, jump_sec: &mut f32, player_position: &mut Vec2, delay_jump: &mut f32) {
@@ -74,7 +40,7 @@ fn handle_jump(jump_state: &mut bool, jump_sec: &mut f32, player_position: &mut 
 
 fn draw_player(player_position: Vec2, player_texture: &Texture2D) {
     let width = player_texture.width();
-    let height = player_texture.height();
+    let height = player_texture.height() ;
 
     // Adjust the position to center the texture
     let x = player_position.x - width / 2.0;
@@ -146,11 +112,12 @@ async fn main() {
     let block_texture: Texture2D = load_texture("assets/block-up.png").await.unwrap();
     let shoot_sound: Sound = load_sound("assets/gun-gunshot-02.wav").await.unwrap();
     let mut last_shot_time = get_time();
-    
-  
+
     let player_size: Vec2 = vec2(64., 96.);
-    let object2: Vec2 = vec2(500., 1000.);
-    let object_size2: Vec2 = vec2(300., 400.); 
+    let object: Vec2 = vec2(screen_width() * 0.9, screen_height() * 0.);
+    let object_size: Vec2 = vec2(screen_width() / 5., screen_height());
+    let object2: Vec2 = vec2(screen_width() * 0., screen_height() * 0.8);
+    let object_size2: Vec2 = vec2(screen_width(), screen_height() / 5.); 
 
     loop {
         
@@ -170,25 +137,29 @@ async fn main() {
                     }
                 }
                 GameState::Gameplay => {
-        draw_grid(&bullet_texture);
+                    draw_grid(&bullet_texture);
+
+        if(dir == false){
+            draw_player(player_position, &texture);
+        
+        }else if(dir == true){
+            draw_player(player_position, &texture2);
+            
+
+        }
+        
+
         let mut mouse_position:Vec2 = mouse_position().into();
 
 
         
 
-        if(dir == false){
-            draw_texture(&texture, player_position[0], player_position[1], WHITE);
-        
-        }else if(dir == true){
-            draw_texture(&texture2, player_position[0], player_position[1], WHITE);
-
-        }
 
 
 
 
 
-
+      
 
         if(player_position[1] < 1030. && !collision_bottom(&mut player_position, object2, object_size2, player_size)){
               player_position[1] += 4.;
@@ -197,7 +168,7 @@ async fn main() {
 
 
 
-        if is_key_down(KeyCode::D)&& !collision_right(&mut player_position, object2, object_size2, player_size){
+        if is_key_down(KeyCode::D)&& !collision_right(&mut player_position, object2, object_size2, player_size) && !collision_right(&mut player_position, object, object_size, player_size){
             player_position.x += 5.0;
             dir = true;
         }
@@ -206,6 +177,7 @@ async fn main() {
             dir = false;
         }
         draw_rectangle(object2[0], object2[1], object_size2[0], object_size2[1], BLUE);
+        draw_rectangle(object.x, object.y, object_size.x, object_size.y, BLUE);
 
         
 
@@ -213,7 +185,7 @@ async fn main() {
         if is_mouse_button_down(MouseButton::Left) && current_time - last_shot_time >= 0.2 {
             let player_pos = vec2(player_position[0], player_position[1]); // Define player position
             let mouse_pos: Vec2 = mouse_position.into();
-            let bullet = Bullet::new(player_pos, (mouse_pos - player_pos).normalize() * 5.0);
+            let bullet = Bullet::new(player_pos, (mouse_pos - player_pos).normalize() * 10.0);
             bullets.push(bullet);
             play_sound_once(&shoot_sound);
 
@@ -223,15 +195,18 @@ async fn main() {
         
         
         for bullet in bullets.iter_mut() {
-            if bullet.pos[0] < 0. || bullet.pos[0] > 1920. || bullet.pos[1] < 0. || bullet.pos[1] > 1080. {
+            if bullet.pos[0] < 0. || bullet.pos[0] > screen_width() || bullet.pos[1] < 0. || bullet.pos[1] > screen_height() {
                 bullet.pos = vec2(-100., -100.);
+                
             }
         }
         
         for bullet in bullets.iter_mut() {
             bullet.update();
             bullet.draw(&bullet_texture);
+            println!("{:?}", bullet.pos);
         }
+   
 
      
 

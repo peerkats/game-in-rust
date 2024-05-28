@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 
-const w: i32 = 1920;
+const w: i32 = 3000;
 const H: i32 = 1080;
 
 pub fn draw_grid(new_texture: &Texture2D) {
