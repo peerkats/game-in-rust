@@ -28,17 +28,15 @@ fn collision_top(player_position: &mut Vec2, object_position: Vec2, size: Vec2, 
     }
 }
 
-fn collision_bottom(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: f32) -> bool {
-    let player_bottom_edge = player_position.y + player_size;
-    let object_top_edge = object_position.y;
+fn collision_bottom(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: Vec2) -> bool {
+    let player_pos_y = player_position.y + player_size.y;
+    let palayer_pos_x = player_position.x;
+    let object_pos_y = object_position.y;
+    let object_size_x = size.x;
+    let object_pos_x = object_position.x;
 
-    let player_left = player_position.x;
-    let player_right = player_position.x + player_size;
-    let object_left = object_position.x;
-    let object_right = object_position.x + size.x;
 
-    if player_bottom_edge > object_top_edge && player_bottom_edge <= object_top_edge + size.y &&
-        player_right > object_left && player_left < object_right {
+    if player_pos_y >= object_pos_y && !{palayer_pos_x < object_pos_x} && !{palayer_pos_x > object_pos_x + object_size_x}{
         // Collision detected, player is colliding with the top side of the object
         true
     } else {
@@ -46,8 +44,7 @@ fn collision_bottom(player_position: &mut Vec2, object_position: Vec2, size: Vec
         false
     }
 }
-
-
+ 
 
 fn handle_jump(jump_state: &mut bool, jump_sec: &mut f32, player_position: &mut Vec2, delay_jump: &mut f32) {
     if is_key_pressed(KeyCode::Space) && player_position.y > -1.0 && *delay_jump > 47.0 {
@@ -66,7 +63,7 @@ fn handle_jump(jump_state: &mut bool, jump_sec: &mut f32, player_position: &mut 
     }
 }
 
-    fn collision_left(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: f32) -> bool {
+    fn collision_left(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: Vec2) -> bool {
         
         let player_pos_x = player_position.x;
         let player_pos_y = player_position.y;
@@ -74,11 +71,11 @@ fn handle_jump(jump_state: &mut bool, jump_sec: &mut f32, player_position: &mut 
         let object_size_x = size.x;
         let object_size_y = size.y;
         let object_pos_y = object_position.y;
-        let object_pos_x = object_position.x + object_size_x;
+        let object_pos_x = object_position.x + object_size_x ;
 
         
 
-        if(player_pos_x < object_pos_x && !{player_pos_y < object_pos_y} && {player_pos_y < object_pos_y + object_size_y}){
+        if(player_pos_x < object_pos_x && !{player_pos_y < object_pos_y} && !{player_pos_x < object_position.x}){
             return true
         }else{
             return false
@@ -88,37 +85,22 @@ fn handle_jump(jump_state: &mut bool, jump_sec: &mut f32, player_position: &mut 
 
     }
 
-    fn collision_right(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: f32) -> bool {
-        let player_pos_x = player_position.x + player_size;
+    fn collision_right(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: Vec2) -> bool {
+        let player_pos_x = player_position.x + player_size.x;
         let player_pos_y = player_position.y;
-        
-  
-        let object_size_y = size.y;
-        let object_pos_y = object_position.y;
         let object_pos_x = object_position.x;
-
-        
-
-        if(player_pos_x < object_pos_x && !{player_pos_y < object_pos_y} && !{player_pos_y > object_pos_y + object_size_y}){
+        let object_pos_y = object_position.y;
+        if player_pos_x > object_pos_x && !{player_pos_y < object_pos_y} && !{player_pos_x > object_pos_x + size.x} {
             return true
+
+
         }else{
             return false
         }
-
-
     }
 
 
-fn move_player(player_position: &mut Vec2, dir: &mut bool, object: Vec2, object_size: Vec2, player_size: f32) {
-    if is_key_down(KeyCode::D) && !collision_right(player_position, object, object_size, player_size) {
-        player_position.x += 5.0;
-        *dir = true;
-    }
-    if is_key_down(KeyCode::A) && !collision_left(player_position, object, object_size, player_size){
-        player_position.x -= 5.0;
-        *dir = false;
-    }
-}
+
 
 fn draw_grid(new_texture: &Texture2D) {
     
@@ -213,9 +195,9 @@ async fn main() {
     let mut last_shot_time = get_time();
     
   
-    let player_size = 64.;
-    let object2: Vec2 = vec2(500., 500.);
-    let object_size2: Vec2 = vec2(300., 40.); 
+    let player_size: Vec2 = vec2(64., 96.);
+    let object2: Vec2 = vec2(500., 1000.);
+    let object_size2: Vec2 = vec2(300., 400.); 
 
     loop {
         
@@ -267,7 +249,7 @@ async fn main() {
 
 
 
-        if is_key_down(KeyCode::D){
+        if is_key_down(KeyCode::D)&& !collision_right(&mut player_position, object2, object_size2, player_size){
             player_position.x += 5.0;
             dir = true;
         }
