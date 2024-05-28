@@ -2,6 +2,8 @@
 
 use macroquad::prelude::*;
 mod collision;
+mod background;
+use background::draw_grid;
 use collision::{collision_left, collision_right};
 
 
@@ -70,24 +72,6 @@ fn handle_jump(jump_state: &mut bool, jump_sec: &mut f32, player_position: &mut 
 
 
 
-fn draw_grid(new_texture: &Texture2D) {
-    
-    
-    let block_size = 30.0;
-    let num_blocks_x = (w as f32 / block_size) as i32;
-    let num_blocks_y = (H as f32 / block_size) as i32;
-
-    for i in 0..num_blocks_x {
-        for j in 0..num_blocks_y {
-            let x = i as f32 * block_size;
-            let y = j as f32 * block_size;
-            
-            
-            draw_texture(&new_texture, x, y,  WHITE);
-        }
-    }
-}
-
 fn draw_player(player_position: Vec2, player_texture: &Texture2D) {
     let width = player_texture.width();
     let height = player_texture.height();
@@ -153,14 +137,14 @@ async fn main() {
     let mut jump_sec: f32 = 0.;
     let mut jump_state: bool = false;
     let mut delay_jump: f32 = 0.;
-    let mut texture: Texture2D = load_texture("/home/peer/world/code/assets/princess-side.png").await.unwrap();
-    let mut texture2: Texture2D = load_texture("/home/peer/world/code/assets/princess-side1.png").await.unwrap();
+    let mut texture: Texture2D = load_texture("assets/princess-side.png").await.unwrap();
+    let mut texture2: Texture2D = load_texture("assets/princess-side1.png").await.unwrap();
     let mut dir: bool = false; 
-    let bullet_texture: Texture2D = load_texture("/home/peer/world/code/assets/arrow.png").await.unwrap();
+    let bullet_texture: Texture2D = load_texture("assets/arrow.png").await.unwrap();
     let mut bullets: Vec<Bullet> = Vec::new();
     let mut game_state = GameState::StartScreen;
-    let block_texture: Texture2D = load_texture("/home/peer/world/code/assets/block-up.png").await.unwrap();
-    let shoot_sound: Sound = load_sound("/home/peer/world/code/assets/gun-gunshot-02.wav").await.unwrap();
+    let block_texture: Texture2D = load_texture("assets/block-up.png").await.unwrap();
+    let shoot_sound: Sound = load_sound("assets/gun-gunshot-02.wav").await.unwrap();
     let mut last_shot_time = get_time();
     
   
@@ -188,17 +172,6 @@ async fn main() {
                 GameState::Gameplay => {
         draw_grid(&bullet_texture);
         let mut mouse_position:Vec2 = mouse_position().into();
-
-
-        
-
-    
-
-
-
-        
-
-     
 
 
         
