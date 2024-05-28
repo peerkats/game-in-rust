@@ -1,6 +1,8 @@
 
 
 use macroquad::prelude::*;
+mod collision;
+use collision::{collision_left, collision_right};
 
 
 use macroquad::audio::{load_sound, play_sound_once, Sound};
@@ -63,41 +65,7 @@ fn handle_jump(jump_state: &mut bool, jump_sec: &mut f32, player_position: &mut 
     }
 }
 
-    fn collision_left(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: Vec2) -> bool {
-        
-        let player_pos_x = player_position.x;
-        let player_pos_y = player_position.y;
-        
-        let object_size_x = size.x;
-        let object_size_y = size.y;
-        let object_pos_y = object_position.y;
-        let object_pos_x = object_position.x + object_size_x ;
 
-        
-
-        if(player_pos_x < object_pos_x && !{player_pos_y < object_pos_y} && !{player_pos_x < object_position.x}){
-            return true
-        }else{
-            return false
-        }
-
-
-
-    }
-
-    fn collision_right(player_position: &mut Vec2, object_position: Vec2, size: Vec2, player_size: Vec2) -> bool {
-        let player_pos_x = player_position.x + player_size.x;
-        let player_pos_y = player_position.y;
-        let object_pos_x = object_position.x;
-        let object_pos_y = object_position.y;
-        if player_pos_x > object_pos_x && !{player_pos_y < object_pos_y} && !{player_pos_x > object_pos_x + size.x} {
-            return true
-
-
-        }else{
-            return false
-        }
-    }
 
 
 
@@ -143,6 +111,7 @@ fn conf() -> Conf {
 }
 
 enum GameState {
+    SettingsScreen,
     StartScreen,
     Gameplay,
 }
@@ -202,6 +171,12 @@ async fn main() {
     loop {
         
             match game_state {
+                GameState::SettingsScreen =>{
+                    draw_text("Settings", screen_width() / 2. - 100., screen_height() / 2., 40., BLACK);
+                    if is_key_pressed(KeyCode::Escape) {
+                        game_state = GameState::StartScreen;
+                    }
+                }
                 GameState::StartScreen => {
                     clear_background(WHITE);
                     draw_text("Press SPACE to start", screen_width() / 2. - 100., screen_height() / 2., 40., BLACK);
