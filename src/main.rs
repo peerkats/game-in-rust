@@ -112,6 +112,7 @@ async fn main() {
     let block_texture: Texture2D = load_texture("assets/block-up.png").await.unwrap();
     let shoot_sound: Sound = load_sound("assets/gun-gunshot-02.wav").await.unwrap();
     let mut last_shot_time = get_time();
+    let gun: Texture2D = load_texture("assets/gun.png").await.unwrap();
 
     let player_size: Vec2 = vec2(64., 96.);
     let object: Vec2 = vec2(screen_width() * 0.9, screen_height() * 0.);
@@ -137,22 +138,66 @@ async fn main() {
                     }
                 }
                 GameState::Gameplay => {
+                    let mut mouse_position:Vec2 = mouse_position().into();
                     draw_grid(&bullet_texture);
 
         if(dir == false){
             draw_player(player_position, &texture);
+            let radius = 50.0; // The radius of the circle around which the texture rotates
+
+            // Calculate the angle to the mouse as before
+            let diff = mouse_position - vec2(player_position.x, player_position.y);
+            let angle = diff.y.atan2(diff.x);
+
+            // Calculate the position of the texture
+            let texture_position = player_position + vec2(radius * angle.sin(), radius * angle.cos());
+
+            // Draw the texture at the calculated position, rotated by the angle
+            draw_texture_ex(
+                &gun,
+                texture_position.x,
+                texture_position.y,
+                WHITE,
+                
+                DrawTextureParams {
+                    flip_x: true,
+                    rotation: angle,
+                    ..Default::default()
+                },
+            );
         
         }else if(dir == true){
             draw_player(player_position, &texture2);
+            let radius = 50.0; // The radius of the circle around which the texture rotates
+
+            // Calculate the angle to the mouse as before
+            let diff = mouse_position - vec2(player_position.x, player_position.y);
+            let angle = diff.y.atan2(diff.x);
+
+            // Calculate the position of the texture
+            let texture_position = player_position + vec2(radius * angle.cos(), radius * angle.sin());
+
+            // Draw the texture at the calculated position, rotated by the angle
+            draw_texture_ex(
+                &gun,
+                texture_position.x,
+                texture_position.y,
+                WHITE,
+                DrawTextureParams {
+                    rotation: angle,
+                    ..Default::default()
+                },
+            );
             
 
         }
         
 
-        let mut mouse_position:Vec2 = mouse_position().into();
+   
 
 
-        
+
+
 
 
 
@@ -183,9 +228,15 @@ async fn main() {
 
         let current_time = get_time();
         if is_mouse_button_down(MouseButton::Left) && current_time - last_shot_time >= 0.2 {
-            let player_pos = vec2(player_position[0], player_position[1]); // Define player position
+            let diff = mouse_position - vec2(player_position.x, player_position.y);
+            let angle = diff.y.atan2(diff.x);
+            let gun_length = 100.0; // Replace with the actual length of your gun texture
+            let gun_angle = angle; // The angle you calculated earlier
+
+            let bullet_start_position = player_position + vec2(gun_length * gun_angle.cos(), gun_length * gun_angle.sin());
+            
             let mouse_pos: Vec2 = mouse_position.into();
-            let bullet = Bullet::new(player_pos, (mouse_pos - player_pos).normalize() * 10.0);
+            let bullet = Bullet::new(bullet_start_position, (mouse_pos - bullet_start_position).normalize() * 10.0);
             bullets.push(bullet);
             play_sound_once(&shoot_sound);
 
