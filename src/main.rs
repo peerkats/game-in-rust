@@ -113,12 +113,14 @@ async fn main() {
     let shoot_sound: Sound = load_sound("assets/gun-gunshot-02.wav").await.unwrap();
     let mut last_shot_time = get_time();
     let gun: Texture2D = load_texture("assets/gun.png").await.unwrap();
+    let gun2: Texture2D = load_texture("assets/gun-flipped.png").await.unwrap();
 
     let player_size: Vec2 = vec2(64., 96.);
     let object: Vec2 = vec2(screen_width() * 0.9, screen_height() * 0.);
     let object_size: Vec2 = vec2(screen_width() / 5., screen_height());
     let object2: Vec2 = vec2(screen_width() * 0., screen_height() * 0.8);
     let object_size2: Vec2 = vec2(screen_width(), screen_height() / 5.); 
+    let mut mirror = false;
 
     loop {
         
@@ -143,6 +145,8 @@ async fn main() {
 
         if(dir == false){
             draw_player(player_position, &texture);
+                   
+
             let radius = 50.0; // The radius of the circle around which the texture rotates
 
             // Calculate the angle to the mouse as before
@@ -150,7 +154,7 @@ async fn main() {
             let angle = diff.y.atan2(diff.x);
 
             // Calculate the position of the texture
-            let texture_position = player_position + vec2(radius * angle.sin(), radius * angle.cos());
+            let texture_position = player_position - vec2(player_size.x, 0.) + vec2(radius * angle.cos(), radius * angle.sin());
 
             // Draw the texture at the calculated position, rotated by the angle
             draw_texture_ex(
@@ -158,16 +162,19 @@ async fn main() {
                 texture_position.x,
                 texture_position.y,
                 WHITE,
-                
                 DrawTextureParams {
-                    flip_x: true,
+                    
+                    flip_y : mirror,
+                    
                     rotation: angle,
                     ..Default::default()
                 },
             );
-        
+            
+
         }else if(dir == true){
-            draw_player(player_position, &texture2);
+            draw_player(player_position, &texture2);        
+
             let radius = 50.0; // The radius of the circle around which the texture rotates
 
             // Calculate the angle to the mouse as before
@@ -175,7 +182,7 @@ async fn main() {
             let angle = diff.y.atan2(diff.x);
 
             // Calculate the position of the texture
-            let texture_position = player_position + vec2(radius * angle.cos(), radius * angle.sin());
+            let texture_position = player_position - vec2(20., 0.) + vec2(radius * angle.cos(), radius * angle.sin());
 
             // Draw the texture at the calculated position, rotated by the angle
             draw_texture_ex(
@@ -211,15 +218,21 @@ async fn main() {
         }
     
 
-
+        if player_position.x < mouse_position.x{
+            dir = true;
+            mirror = true;
+            
+        }else{
+            dir = false;
+        }
 
         if is_key_down(KeyCode::D)&& !collision_right(&mut player_position, object2, object_size2, player_size) && !collision_right(&mut player_position, object, object_size, player_size){
             player_position.x += 5.0;
-            dir = true;
+            
         }
         if is_key_down(KeyCode::A) && !collision_left(&mut player_position, object2, object_size2, player_size){
             player_position.x -= 5.0;
-            dir = false;
+            
         }
         draw_rectangle(object2[0], object2[1], object_size2[0], object_size2[1], BLUE);
         draw_rectangle(object.x, object.y, object_size.x, object_size.y, BLUE);
